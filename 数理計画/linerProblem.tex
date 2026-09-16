@@ -1,0 +1,745 @@
+\documentclass[9pt]{ltjsreport}
+\usepackage{bm}
+\usepackage{amsmath,amssymb}
+\usepackage{tcolorbox}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{subcaption}
+\usepackage{tikz}
+\usepackage{listings}
+\usetikzlibrary{graphs}
+
+\begin{document}
+
+\section{線形計画}
+\subsection{線形計画問題の標準形はどのような形か}
+\begin{tcolorbox}[title=線形計画問題の標準形]
+    \begin{gather*}
+        \text{目的関数}:\bm{c}^\top \bm{x}
+        \longrightarrow \min\\        
+        \text{制約条件}:\bm{Ax}=\bm{b},\bm{x} \ge \bm{0}
+    \end{gather*}
+\end{tcolorbox}
+\subsection{以下に示す問題系を標準形に変形せよ}
+
+\begin{align*}
+    \text{目的関数：}&-2x_1+5x_2\longrightarrow\max\\
+    \text{制約条件：}&4x_1-6x_2=30\\
+    &2x_1+8x_2\le50\\
+    &7x_1+5x_2\ge10\\
+    &x1\ge0,x_2\text{(符号成約なし)}
+\end{align*}
+
+\hrulefill
+
+この問題は、標準形と比較し、
+\begin{enumerate}
+    \item 目的関数を最大化している
+    \item $x_2$に符号制約がない
+    \item $\le,\ge$を含む不等式がある
+\end{enumerate}
+という３点が異なる。
+
+目的関数の最大化は、
+目的関数全体に-1をかけた関数を最小化することと同じ。
+
+(2)については、
+変数$x_2$を
+\begin{equation*}
+    x_2=x_2'-x_2'', x_2'\ge0,x_2''\ge0
+\end{equation*}
+と置き換えることで対処できる。
+
+以下では、$x_2'$を$x_2$、$x_2''$を$x_3$とかく。
+
+(3)については、
+$\le , \ge$のかわりに新しい非負変数(スラック変数)
+を導入することで解決する。
+
+以上をまとめると、次の問題は、
+\begin{align*}
+    \text{目的関数：}&2x_1-5x_2+5x_3\longrightarrow\mathrm{min}\\
+    \text{制約条件：}&4x_1-6x_2+6x_3=30\\
+                   &2x_1+8x_2-8x_3+x_4=50\\
+                   &7x_1+5x_2-5x_3-x_5=10\\
+                   &x_1,\dots,x_5\ge0
+\end{align*}
+と置き換えれる。
+
+\newpage
+\subsection{シンプレックス法とは}
+前提として、線形計画問題の実行可能領域(制約条件を満たす\bm{x}の集合)
+は空間$\mathbb{R}^n$内の凸多面体として存在する。
+
+そして、最適解は一般に凸多面体の頂点の中にある。
+
+２変数の線形計画問題を図示すればこれは容易にわかる。
+
+全実行可能領域から最適解を見つけようとするのではなく、
+その頂点を効率的に探索して最適解を見つけ出す手法が
+シンプレックス法である。
+
+\begin{tcolorbox}[title=基底解、実行可能基底解、基底変数、非基底変数、退化した基底解]
+    線形計画問題において、その変数は$\bm{x}=(a_1,\dots,a_n)^\top$
+    の形であると仮定する。そして、制約条件がk個あると仮定する。
+
+    この時、自由度は\bm{x}の自由度はn-kである。
+
+    n個の変数のうちn-k個の変数を適当に選び、それらに0を代入すれば
+    残りの変数の値は一意的に定まるはずである。
+
+    このようにして決まった$\bm{x}$を基底解という。
+
+    基底解は$\binom{n}{n-k}$個存在する。
+    \begin{description}
+        \item[実行可能基底解] 基底解のうち$\bm{x}\ge\bm{0}$を満たすもの
+        \item[非基底変数] 基底解を求める際に0とおいた変数
+        \item[基底変数] 非基底変数以外の変数
+        \item[退化した基底解] 基底変数の中に値が0であるようなものが存在する場合
+    \end{description}
+\end{tcolorbox}
+\begin{tcolorbox}[title=基底行列、非基底行列]
+    ある基底解\bm{x}は、n-k個の非底変数とk個の基底変数をを持つものとする。
+    
+    n-k次元非基底変数ベクトルを$\bm{x}_N$、
+    k次元基底変数ベクトルを$\bm{x}_B$と置く。
+    
+    次に、
+    制約条件$A\bm{x}=\bm{b}$を、基底変数に対応するk個の列と非基底変数
+    に対応するn-k個の列に分割し、
+    前者からなるAをB、後者をN、
+    とおく。
+
+    \begin{description}
+        \item[基底行列]Bが正則である時のB
+        \item[非基底行列]Bが正則であるときのN
+    \end{description}
+\end{tcolorbox}
+制約条件式$A\bm{x}=\bm{b}$は基底行列と非基底行列で
+\begin{gather}
+    B\bm{x}_B+N\bm{x}_N=\bm{b}\\
+    \bm{x}_B=B^{-1}\bm{b}, \bm{x}_N=\bm{0}
+\end{gather}
+と書ける。
+
+$B^{-1}\bm{b}\ge0$の時、この基底解は実行可能基底解となる。
+
+実行可能基底解はその各々が凸多面体の頂点に対応する。
+
+
+\begin{tcolorbox}[title=ピポット操作]
+ある実行可能基底解に対して、一組の基底変数と
+非基底変数を入れ替えた基底解がまた実行可能基底解となる時、
+この操作は実行可能領域の一つの頂点からそれと隣り合う
+別の頂点に移動することを意味する。
+このような基底変数と非基底変数の
+入れ替えを\textbf{ピポット操作}という。
+\end{tcolorbox}
+\begin{tcolorbox}[title=シンプレックス乗数、双対コスト係数]
+    以下のように定義されたm次元ベクトル$\bm{\pi}$をシンプレックス定数と呼ぶ。
+    \begin{equation}
+        \bm{\pi}=(B^\top)^{-1}\bm{c}_B
+    \end{equation}
+
+    以下のように定義されたベクトル
+    \begin{equation}
+    \bm{c}_N-N^\top\bm{\pi}
+    \end{equation}
+    を非規定変数$\bm{x}_N$の相対コスト係数と呼ぶ。
+\end{tcolorbox}
+
+\subsubsection{ある実行可能基底解が最適解かどうかの確認方法}
+ある実行可能基底解$\bm{x}=(x_{B},x_{N})=(B^{-1}\bm{b},\bm{0})$を問題に代入する。
+\begin{equation}
+    \bm{x}_B=B^{-1}\bm{b}-B^{-1}N\bm{x}_N \label{eq:transformedBase}
+\end{equation}
+と表される。この式を代入し、問題を変形していくと、
+線形計画問題は
+\begin{gather}
+    \text{目的関数：}\bm{\pi}^\top\bm{b}+
+    (\bm{c}_N-N^\top\bm{\pi})^\top\bm{x}_N
+    \longrightarrow \min\\
+    \text{制約条件:}
+    B^{-1}\bm{b}-B^{-1}N\bm{x}_N\ge\bm{0},
+    \hspace{1cm}\bm{x}_N\ge\bm{0}    
+\end{gather}
+という形になる。
+
+いま対象にしている以外の全ての実行可能解は$\bm{x}_N\ge\bm{0}$
+であることを考えれば、
+相対コスト係数が0以上
+\begin{equation}
+    \bm{c}_N-N^\top\bm{\pi}\ge 0
+\end{equation}
+であるならば対象の実行可能界は最適解であると言える。
+
+\subsubsection{ある実行可能基底解が最適解でない時はどうするか}
+    $\bm{c}_N-N^\top\bm{\pi}>0$を満たさない時、
+    双対コスト係数の要素の中に負であるものが少なくとも
+    一つ存在する。
+
+    そのような負の係数をもつ非基底変数$x_k$を一つ選ぶ。
+    この$x_k$を0から増加させれば、目的関数は減少する。
+
+    もちろん、その増加は制約条件を満たしながら行わなければ
+    ならないので、$\bm{x}_B$は式(\ref{eq:transformedBase})
+    より、
+    \begin{equation}
+        \bm{x}_B=B^{-1}\bm{b}-B^{-1}\bm{a}_kx_k \label{eq:xBTrans}
+    \end{equation}
+    に従い変化する。($\bm{a}_k$はAのk列目を抜き出した列ベクトルとなる)
+    (もとから$B^{-1}\bm{a}_kx_k$が差分として引かれた形)
+
+    ここで、
+    \begin{gather}
+        \bar{\bm{b}}:=B^{-1}\bm{b}\\
+        \bm{y}:=B^{-1}\bm{a}_k\\
+    \end{gather}
+    を定義し、式(\ref{eq:xBTrans})を書き換えれば、
+    \begin{equation}
+        x_i=\bar{b_i}-y_ix_k (i\in 基底変数の係数の集合)
+    \end{equation}
+    とかける。
+    よって、非基底変数$x_k$を
+    \begin{equation}
+       \theta :=\min\{\frac{\bar{b_i}}{y_i}|y_i>0(i=1,2,\dots,m)\}
+    \end{equation}
+    まで増加させても、非負条件$\bm{x}\ge\bm{0}$は保たれる。
+
+    $\theta$だけ$x_k$を増加させたなら、$\bm{x}_B$
+    のなかに0となる値が現れる。
+
+    このようにしてピポット操作を行う。
+
+\begin{tcolorbox}[title=有界でない問題]
+        仮に、$\forall (y_i<0)$であるなら、
+    非基底変数$x_k$を任意に増加させたとしても、
+    基底変数の非負条件を破ることはないため、
+    目的関数を無限に小さくできる。
+    このような問題を\textbf{有界でない}という。
+\end{tcolorbox}
+
+\subsubsection{シンプレックス法のまとめ}
+以上に示したように、非基底変数と基底変数を入れ替えながら
+実行可能解を探索することで最適解を見つける。
+
+そのプロセスを以下にまとめる。
+\begin{tcolorbox}[title=シンプレックス法のアルゴリズム(まとめ)]
+\begin{enumerate}
+    \item 線形計画問題を標準形にする
+    \item 初期実行可能基底解として適当な基底解を一つ求める
+    \item シンプレックス乗数を計算する
+    \item 相対コスト係数を計算する
+    \item 相対コスト係数が全て0以上なら、計算終了。
+    そうでなければ、相対コスト変数のうち、負の係数をもつ
+    非基底変数$x_k$を一つ選ぶ。
+    \item $\bm{y}=B^{-1}\bm{a}_k$を計算する
+    \item $\forall (y_i<0)$なら、問題は有界でないため終了。
+    そうでないなら、\theta を計算し、\bm{x}を更新する。
+
+    ステップ(3)に戻る。
+\end{enumerate}
+\end{tcolorbox}
+実際に問題を解くときは、
+以下で紹介するシンプレックスタブローを使って計算する。
+
+\newpage
+
+\subsection{シンプレックス・タブローとは}
+シンプレックス・タブローとは
+シンプレックス法の計算を表形式で簡単に行う方法である。
+
+以下の線形計画問題をシンプレックスタブローで計算しろ。
+
+\begin{align}
+    \text{目的関数：}&-x_1-x_2\longrightarrow \min \\
+    \text{制約条件：}&3x_1+2x_2+x_3=12\\
+                   &x_1+2x_2+x_4=8\\
+                   &x_1\ge 0,x_2\ge 0,x_3\ge 0,x_4\ge 0
+\end{align}
+この問題の初期実行可能基底解を$(0,0,12,8)$とする。
+
+\hrulefill
+
+上の問題に対し、以下のようなシンプレックス・タブローを考える。
+\begin{table}[h]
+        \centering
+        \begin{tabular}{ccccc|c}\toprule
+            &-1&-1&0&0&0\\ \midrule
+            $x_3$&3&2&1&0&12\\
+            $x_4$&1&2&0&1&8 \\ \bottomrule
+        \end{tabular}
+\end{table}
+
+タブローの最初の行は目的関数における各変数の係数、
+その下は制約条件の変数係数、右端の数は制約条件の右辺の定数を示す。
+
+右上角にはこの基底解における目的関数値に-1をかけた数を書く。
+
+左端の列には対応する基底変数を書く。
+
+そして、このようにシンプレックスタブローを作れる場合、
+双対コスト係数がタブローの最初の行に、
+$\bm{x}_B$が一番右の列に現れることに注意する。
+
+このタブローに対し、以下のような操作を行う。
+
+\begin{enumerate}
+    \item 双対コスト係数が全て正なら終了
+    \item 双対コスト係数(一番上の行)が負となっている列のうち、
+    その絶対値が最も大きい行を選択(第i列とする)
+    \item 第i列の正の要素に注目し、その各要素でその行の
+    右端の列の要素を割った値を計算(第i列が全て負の要素なら、
+    この問題は有界でないので、解を持たない。)
+    \item 計算した時、その値が最も小さくなる要素をピポット要素とする。
+    \item ピポット要素で、列基本変形をする
+    \item 基底変数（左端の列）を更新する
+    \item 新しく得られたタブローで、１に戻る
+\end{enumerate}
+この操作は注意深く観察すれば、
+先に述べたシンプレックス法のアルゴリズムと完全に
+一致するとわかる。
+
+この手順に沿って計算していくと、最適解が
+$(x_1,x_2)^\top =(2,3)\top$
+となる。
+
+\newpage
+
+\subsection{二段階シンプレックス法とは}
+ある線形計画問題に対し、シンプレックス法を適用させようとしても、
+問題に対し初期実行可能基底解が見つからないことがある。
+
+このとき、初期実行可能解を見つけるために用いられるのが、
+二段階シンプレックス法である。
+
+以下の問題に対し二段階シンプレックス法を適用させよ。
+
+\begin{align}
+    \text{目的関数：}&-2x_1-x_2-x_3\longrightarrow \min \\
+    \text{制約条件：}&x_1+2x_2=12\\
+                   &x_1+4x_2+2x_3=20\\
+                   &x_1\ge 0,x_2\ge 0,x_3\ge 0
+\end{align}
+
+\hrulefill
+
+次のような補助問題を考える。
+
+\begin{align}
+    \text{目的関数：}&x_4+x_5\longrightarrow \min \\
+    \text{制約条件：}&x_1+2x_2+x_4=12\\
+                   &x_1+4x_2+2x_3+x_5=20\\
+                   &x_1\ge 0,x_2\ge 0,x_3\ge 0,x_4\ge 0,x_5\ge 0
+\end{align}
+この時導入した$x_4,x_5$は人為変数、人工変数と呼ばれる。
+
+仮に、補助問題において目的関数値が0となるような実行可能基底解
+が得られた場合、$x_4=x_5=0$となるため、
+$\bm{x}_b=(x_1,x_2,x_3)$は元の問題の制約条件も満たす
+実行可能基底解となる。
+
+補助問題における目的関数値が０となる実行可能基底解が存在すると
+すれば、それは$x_1\ge 0,x_2\ge 0$から、そのまま最適解
+となる。
+
+このことから、補助問題の最適解を求め、その目的関数値が０だとすれば、
+その最適解は元の問題の実行可能基底解となる。
+
+まず、補助問題をタブローで表現しよう。
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{cccccc|c}\toprule
+        &0&0&0&1&1&0\\ \midrule
+        $x_4$&1&2&0&1&0&12\\
+        $x_5$&1&4&2&0&1&20 \\ \bottomrule
+    \end{tabular}
+\end{table}
+上端の行は、双対コスト係数を表していない。
+
+これを修正するには、
+$x_4,x_5$に対応する行全体をそれぞれ一番上の行から引き、
+\begin{table}[h]
+    \centering
+    \begin{tabular}{cccccc|c}\toprule
+        &-2&-6&-2&0&0&-32\\ \midrule
+        $x_4$&1&2&0&1&0&12\\
+        $x_5$&1&4&2&0&1&20 \\ \bottomrule
+    \end{tabular}
+\end{table}
+とすればいい。
+
+このタブローに対し、計算すれば、
+$(x_1,x_2,x_3,x_4,x_5)^\top =(4,4,0,0,0)^\top$
+となる。
+
+よって、主問題の実行可能基底解を$(x_1,x_2,x_3)=(4,4,0)$
+とすればよい。
+
+\newpage
+\subsection{弱双対性定理、双対定理とは}
+任意の線形計画問題に対し、もう一つの双対問題(Dual Problem)という
+線形計画問題を定義できる。
+この時、元の問題を主問題(Primal Problem)と呼ぶ。
+
+標準形の問題に対する(D)は以下のように定義される。
+\begin{tcolorbox}[title=標準形とその双対問題]
+    \begin{gather}
+        \text{目的関数}:\bm{c}^\top \bm{x}\label{eq:stddual}
+        \longrightarrow \min\\        
+        \text{制約条件}:A\bm{x}=\bm{b},\bm{x} \ge \bm{0}\notag
+    \end{gather}
+    \hrulefill
+    \begin{gather*}
+        \text{目的関数}:\bm{b}^\top \bm{w}
+        \longrightarrow \max\\        
+        \text{制約条件}:A^\top\bm{w}\le \bm{c}
+    \end{gather*}
+\end{tcolorbox}
+
+対称性を考えた形では、以下のようになる。
+\begin{tcolorbox}
+    \begin{gather*}
+        \text{目的関数}:\bm{c}^\top \bm{x}
+        \longrightarrow \min\\        
+        \text{制約条件}:A\bm{x}\ge \bm{b},\bm{x} \ge \bm{0}
+    \end{gather*}
+    \hrulefill
+    \begin{gather*}
+        \text{目的関数}:\bm{b}^\top \bm{w}
+        \longrightarrow \max\\        
+        \text{制約条件}:A^\top\bm{w}\le \bm{c},\bm{w}\ge 0
+    \end{gather*}
+\end{tcolorbox}
+
+適当な一対の(P),(D)から、ほかの任意の(P),(D)の対を
+導くことも可能である。
+
+任意の(P),(D)の組に対して成立する以下の定理群を紹介する。
+\begin{tcolorbox}[title=弱双対定理]
+    (P)と(D)のそれぞれの任意の実行可能解$\bm{x},\bm{w}$
+    に対して、常に不等式
+    $\bm{c}^\top\bm{x}\ge\bm{b}^\top\bm{w}$
+    が成立する。
+
+    \hrulefill
+
+    Proof.
+    
+    問題(\ref{eq:stddual})の主問題と双対問題
+    の組で考える。
+
+    それぞれの問題の制約条件から、
+
+    \begin{equation*}
+        \bm{c}^\top \bm{x}\ge (A^\top \bm{w})^\top \bm{x}
+        =\bm{w}^\top\bm{b}
+    \end{equation*}
+    となる。
+    
+    \hrulefill
+
+    Cor1.
+
+    (P)の任意の実行可能解$\bm{x}$に対して、
+    \begin{equation*}
+        \bm{c}^\top\bm{x}\ge (D)\text{の最大値}
+    \end{equation*}
+    (D)の任意の実行可能解$\bm{w}$に対して、
+    \begin{equation*}
+        \bm{b}^\top\bm{w}\le(P)\text{の最小値}
+    \end{equation*}    
+    \hrulefill
+
+    Cor2.
+
+    (P)と(D)の実行可能解$\bm{x}$と$\bm{w}$が
+    $\bm{c}^\top\bm{x}=\bm{b}^\top\bm{w}$
+    を満たせば、$\bm{x}$と$\bm{w}$はそれぞれ
+    (P)と(D)の最適解であり、
+    (P)の最小値と(D)の最大値は等しい。
+
+    \hrulefill
+
+    Proof.
+
+    弱双対性定理より、(P)の目的関数の値は常に
+    (D)の目的関数の値より大きい。
+
+    よって、
+    $\bm{c}^\top\bm{x}=\bm{b}^\top\bm{w}$
+    が成立するということは、(P)はこれ以上
+    小さい解が存在せず、
+    (D)はこれ以上大きい解が存在しないということである。
+
+    このことから、Cor2が成り立つ。
+    
+    \hrulefill
+
+    Cor3.
+
+    (P)が有界でないならば、(D)は実行可能解をもたない。
+    また、(D)が有界でないならば(P)は実行可能解を持たない。
+\end{tcolorbox}
+
+%clear
+\begin{tcolorbox}[title=双対定理]
+(P)または(D)の一方が最適解をもてば他方も最適解を持ち、
+(P)の最小値と(D)の最大値は等しい
+
+\hrulefill
+
+Proof.
+
+証明の方針として、(P)の最適解におけるシンプレックス乗数
+が(D)においてどのような振る舞いをするかを探索する。
+
+標準形である
+問題(\ref{eq:stddual})の主問題とその双対問題の組で考える。
+
+主問題が最適解を持つ時、
+その双対問題も最適解を持つことを示せば十分である。
+
+(P)の最適基底解を、
+$\bm{x}^*_B=B^{-1}\bm{b},\bm{x}^*_N=\bm{0}$
+とし、基底行列をB、非基底行列をNとかく。
+
+ベクトル$\bm{w}^*$を$\bm{w}^*=(B^\top)^{-1}\bm{c}_B$
+と定義する(シンプレックス乗数に同じ)。
+
+するとBは最適基底行列であることから、双対係数より、
+$\bm{c}_N-N^\top\bm{w}^*\ge\bm{0}$が成立する。
+
+また、$\bm{w}^*$の定義から、$\bm{c}_B-B^\top\bm{w}^*=\bm{0}$
+が成立する。これらから、
+
+\begin{equation*}
+\binom{B^\top}{N^\top}\bm{w}^*
+\le\binom{\bm{c}_B}{\bm{c}_N}
+\end{equation*}
+の不等式が成り立つ。すなわち、$A^\top\bm{w}^*\le\bm{c}$
+((D)の制約条件)を満たすので、$\bm{w}^*$は(D)の実行可能解
+である。さらに、
+\begin{equation*}
+    \bm{c}^\top\bm{x}^*
+    =\bm{c}_B^\top\bm{x}_B^*+\bm{c}_B^\top\bm{x}_N^*
+    =\bm{c}_B^\top B^{-1}\bm{b}=(\bm{w}^*)^\top\bm{b}
+\end{equation*}
+であるから、弱双対性定理のCor2より、$\bm{x}^*$は(D)の最適解である。
+
+\hrulefill
+
+Cor.
+
+(P)と(D)がともに実行可能解を持てば、それらは最適解をもち、
+(P)の最小値と(D)
+の最大値は等しい。
+
+\hrulefill
+
+Proof.
+
+仮定から、(P)は実行可能解をもつ。
+
+(D)は実行可能解を持つので、弱双対性定理のCor2より、
+(P)は下に有界であることがわかる。
+
+よって、(P)の最小値は存在する。すなわち、(P)は最適解
+を持つので、双対定理より
+(P),(D)は最適解をもち、かつ(P)の最小値と(D)の最大値
+は等しくなる。
+
+\end{tcolorbox}
+これらの結果から、主問題と双対問題は実質的に等価な問題である
+と示唆される。
+
+\subsection{双対問題から主問題の最適解の求め方}
+線形計画問題の解き方の一つに、その問題に対する双対問題
+を利用する方法がある。
+
+双対問題の最適解におけるシンプレックス乗数
+をみることで、主問題の最適基底解
+が見て取れる。
+
+\newpage
+\subsection{感度分析とは}
+与えられた線形計画問題に対し、シンプレックス法で
+最適解を計算できたとする。
+現実においては、問題の係数に対し微妙な誤差が生じる
+可能性が存在する。
+では、その問題の係数の変化に対して最適解はどのように
+振る舞うのだろうか。
+このような考察を感度分析という。
+
+標準形の問題において、制約条件の右辺の定数$\bm{b}=(b_1,
+\dots,b_n)^\top$が$\bm{b}=(\Delta b_1,\dots,\Delta b_n)^\top$
+だけ変化した問題を考える。
+\begin{align}
+    \text{目的関数}:\bm{c}^\top\bm{x}\longrightarrow \min\\
+    \text{制約条件}:A\bm{x}=\bm{b}+\Delta\bm{b},\bm{x}\ge 0
+\end{align}
+$\Delta \bm{b}=\bm{0}$のときの最適基底解が
+$\bm{x}_B=B^{-1}\bm{b},\bm{x}_N^*=\bm{0}$で既に計算されているものとする。
+
+最適解の条件から、
+\begin{gather}
+    B^{-1}\bm{b}\ge\bm{0}\label{eq:kando}\\
+    \bm{c}_N-N^\top(B^\top)^{-1}\bm{c}_B\ge\bm{0}
+\end{gather}
+を満たす。
+
+$\bm{b}$が変化したとしても$(\bm{x}_B,\bm{x}_N)$
+をが最適解であるためには、
+\begin{equation}
+    B^{-1}(\bm{b}+\Delta \bm{b})\ge\bm{0}
+\end{equation}
+を満たす必要がある。
+
+このことから、仮に$\bm{x}_B$が非退化、すなわち
+$\bm{x}_B^*=B^{-1}\bm{b}\ge\bm{0}$かつ
+変化量が十分に小さいならば、最適基底行列Bは変化しない。
+
+式(\ref{eq:kando})の目的関数の最小値を
+$\varphi(\bm{b}+\Delta\bm{b})$とあらわせば、
+\begin{gather}
+    \varphi(\bm{b})
+    =\bm{c}_B^\top B^{-1}(\bm{b})\\
+    \varphi(\bm{b}+\Delta\bm{b})
+    =\bm{c}_B^\top B^{-1}(\bm{b}+\Delta{b})\\
+    \varphi(\bm{b}+\Delta\bm{b})-\varphi(\bm{b})
+    =\bm{c}_B^\top B^{-1}(\Delta\bm{b})
+\end{gather}
+が成立する。
+
+シンプレックス乗数が$\bm{w}^*=(B^\top)^{-1}\bm{c}_B$
+となることを考えれば、
+\begin{gather}
+    \varphi(\bm{b}+\Delta\bm{b})-\varphi(\bm{b})
+    =\bm{w}^{*\top}\Delta\bm{b}\\
+    \frac{\partial\varphi(\bm{b})}{\partial b_i}=w_i^*　（i=1,\dots,m)\label{eq:partialShadowPrice}
+\end{gather}
+と書き換えることができる。
+
+式(\ref{eq:partialShadowPrice})から、
+制約条件の右辺を一単位変化させたときの目的変数の変化量は、
+双対問題の解であることを示している。
+\newpage
+\subsection{シンプレックス法の計算量について述べよ}
+シンプレックス法の反復回数は経験的に、問題の制約条件の
+数の2から3倍である。
+しかし、厳密に言うとシンプレックス法は多項式時間アルゴリズム
+ではない。
+ある種の人工的に作られた線形計画問題に対して、計算量
+が爆発的に増加することがあり得る。
+この欠点を克服したのがカーマーカーにより提唱された
+内分法である。
+
+内点法そのものは、領域の内部を経由して問題の解に収束する
+点列を生成するという性質を持つアルゴリズムの総称である。
+\subsection{パス追跡法を主双対内点法の枠組みで構成せよ}
+\subsubsection{相補性条件による問題の書き換え}
+標準形の形の(P)とその双対問題(D)を以下に再掲する。
+\begin{tcolorbox}[title=標準形とその双対問題]
+    \begin{gather}
+        \text{目的関数}:\bm{c}^\top \bm{x}\label{eq:stddual}
+        \longrightarrow \min\\        
+        \text{制約条件}:A\bm{x}=\bm{b},\bm{x} \ge \bm{0}\notag
+    \end{gather}
+    \hrulefill
+    \begin{gather*}
+        \text{目的関数}:\bm{b}^\top \bm{w}
+        \longrightarrow \max\\        
+        \text{制約条件}:A^\top\bm{w}+\bm{s}= \bm{c},
+        \bm{s}\ge \bm{0},\bm{w}\ge \bm{0}
+    \end{gather*}
+双対問題はスラック変数で書き換えられていることに注意
+\end{tcolorbox}
+双対定理、弱双対定理Cor2.より、
+$\bm{x}$と$\bm{w}$が最適解であることと、
+\begin{equation}
+    \label{eq:naibunnPre}
+    \begin{cases}
+        \bm{c}^\top\bm{x}=\bm{b}^\top\bm{w}\\
+        A\bm{x}=\bm{b}\\
+        A^\top\bm{w}+\bm{s}=\bm{c}\\
+        \bm{x}\ge\bm{0},\bm{s}\ge\bm{0}
+    \end{cases}
+\end{equation}
+は等価である。
+
+\begin{tcolorbox}[title=相補性条件]
+(\ref{eq:naibunnPre})の第一式である
+$\bm{c}^\top\bm{x}=\bm{b}^\top\bm{w}$
+は、
+\begin{equation}
+    \bm{c}^\top\bm{x}-\bm{b}^\top\bm{w}
+    =(A^\top+\bm{s})^\top\bm{x}-\bm{b}^\top\bm{w}
+    =\bm{s}^\top\bm{x}+(A\bm{x}-\bm{b})^\top\bm{w}
+    =\bm{s}^\top\bm{x}
+\end{equation}
+なので、$\bm{s}^\top\bm{x}=\bm{0}$
+となるため、
+
+X,Sをそれぞれ$x_j,s_j$を対角要素とする
+$n\times n$行列、
+$\bm{e}$を全ての要素が1である
+n次元ベクトルとすると、
+\textgt{相補性条件}
+\footnote{(\ref{eq:naibunnPre})の第一式
+を相補性条件に置き換えた、(\bm{x},\bm{w},\bm{s})
+を求めるような問題は、その解を求めることで
+元の問題の(P)、(D)の最適解を同時に求めることが
+できるので、主双対最適性条件と呼ばれる。
+この問題は、線形相補性問題というクラスに属する。
+以下で説明する主双対内点法の考え方は、線形相補性問題
+全体に対しても説明できる。}
+\begin{equation}
+    XS\bm{e}=\bm{0}
+\end{equation}
+で書き換えることが可能
+\end{tcolorbox}
+\newpage
+\subsubsection{主双対内点法とは}
+前節から、主問題、双対問題の組を
+相補性条件で置き換えると、
+\begin{equation}
+    \label{eq:souhosei}
+    \begin{cases}
+        XS\bm{e}=\bm{0}\\
+        A\bm{x}=\bm{b}\\
+        A^\top\bm{w}+\bm{s}=\bm{c}\\
+        \bm{x}\ge\bm{0},\bm{s}\ge\bm{0}
+    \end{cases}
+\end{equation}
+となる。
+この問題に対し、
+新たにパラメータ$\mu>0$を定義し
+\begin{equation}
+    \label{eq:paramMu}
+    \begin{cases}
+        XS\bm{e}=\mu\bm{e}\\
+        A\bm{x}=\bm{b}\\
+        A^\top\bm{w}+\bm{s}=\bm{c}\\
+        \bm{x}>\bm{0},\bm{s}>\bm{0}
+    \end{cases}
+\end{equation}
+を考える。
+
+$\mu\longrightarrow 0$とすれば、
+\ref{eq:souhosei}の解に収束する。
+
+そこで、0に収束する数列$\{\mu^k\}_{k\in N}$
+を考え、これが\ref{eq:paramMu}の$\mu$
+パラメータに入るとする。
+
+
+このとき、$\mu^{k-1}$の時の近似解が得られている
+のであれば、
+\ref{eq:paramMu}を線形近似した方程式で、
+$\mu^k$の時の近似解を
+$\mu^{k-1}$の時の近似解の差分として求めることが可能。
+
+このようにして近似を求めていくと、それは
+元の問題の解に収束することが知られている。
+\end{document}
