@@ -1,3 +1,8 @@
+---
+type: Reference
+description: "過去の課題とレポートの repo の README.md"
+---
+
 # coursework
 大学の講義課題や、小規模な実験コードの断片をまとめたもの
 
