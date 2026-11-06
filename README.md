@@ -1,5 +1,4 @@
 ---
-type: Reference
 description: "過去の課題とレポートの repo の README.md"
 ---
 
